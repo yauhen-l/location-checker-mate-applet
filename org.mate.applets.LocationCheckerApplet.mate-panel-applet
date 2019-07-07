@@ -1,0 +1,10 @@
+[Applet Factory]
+Id=LocationCheckerAppletFactory
+Location=${SRC_TARGET}
+Name=Location Checker Applet Factory
+Description=Factory of Location Checker applet
+
+[LocationCheckerApplet]
+Name=Location Checker
+Description=Displays country and city of you current Internet gateway
+Icon=desktop
