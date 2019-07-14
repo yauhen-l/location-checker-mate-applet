@@ -10,9 +10,14 @@ import gi
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('MatePanelApplet', '4.0')
+gi.require_version('Notify', '0.7')
 
-from gi.repository import MatePanelApplet
+from gi.repository import Notify
 from gi.repository import Gtk
+from gi.repository import MatePanelApplet
+
+appletName = 'LocationCheckerApplet'
+appletFactoryName = appletName + 'Factory'
 
 
 def get_location():
@@ -26,7 +31,8 @@ def get_location():
 
         if match:
             data = json.loads(match.group(1))
-            location = data['geo']['countryName'] + ", " + data['geo']['cityName']
+            location = data['geo']['countryName'] + \
+                ", " + data['geo']['cityName']
     except requests.exceptions.Timeout:
         location = 'timeout'
     except requests.exceptions.RequestException as e:
@@ -50,16 +56,30 @@ class Scheduler(threading.Thread):
 
 
 def applet_factory(applet, iid, data):
-    if iid != "LocationCheckerApplet":
+    if iid != appletName:
         return False
 
     # you can use this path with gio/gsettings
     settings_path = applet.get_preferences_path()
 
-    label = Gtk.Label('')
+    initial_location = get_location()
+
+    label = Gtk.Label(initial_location)
+
+    # Without init libnotify crashes
+    Notify.init(appletName)
+
+    notification_title = 'Location has changed'
+    n = Notify.Notification.new(notification_title, initial_location, '')
 
     def update_label():
-        label.set_text(get_location())
+        current_location = label.get_text()
+        new_location = get_location()
+
+        if new_location != current_location:
+            label.set_text(new_location)
+            n.update(notification_title, new_location, '')
+            n.show()
 
     sched = Scheduler(interval_sec=5, func=update_label)
     sched.start()
@@ -70,6 +90,6 @@ def applet_factory(applet, iid, data):
     return True
 
 
-MatePanelApplet.Applet.factory_main("LocationCheckerAppletFactory", True,
+MatePanelApplet.Applet.factory_main(appletFactoryName, True,
                                     MatePanelApplet.Applet.__gtype__,
                                     applet_factory, None)

@@ -16,3 +16,9 @@ uninstall:
 	@rm -rf `dirname $(SRC_TARGET)`
 	@rm $(APPLET_TARGET)
 	@rm $(SERVICE_TARGET)
+
+info:
+	@ls -al $(APPLET_TARGET)
+	@cat $(APPLET_TARGET)
+	@ls -al $(SERVICE_TARGET)
+	@cat $(SERVICE_TARGET)
