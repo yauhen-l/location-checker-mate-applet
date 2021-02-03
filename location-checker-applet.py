@@ -36,7 +36,7 @@ def get_location():
     except requests.exceptions.Timeout:
         location = 'timeout'
     except requests.exceptions.RequestException as e:
-        print e
+        print(e)
         location = 'exception'
     return location
 
